@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina | Advanced Learning Platform</title>
+    <style>
+        /* --- CSS VARIABLES & THEME SETUP --- */
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary: #10b981;
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+            --font-family: 'Segoe UI', system-ui, sans-serif;
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        /* --- LAYOUT UTILITIES --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .flex { display: flex; align-items: center; }
+        .grid { display: grid; gap: 20px; }
+        .hidden { display: none !important; }
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* --- HEADER --- */
+        header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+        }
+        nav { justify-content: space-between; }
+        .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .nav-links { gap: 20px; }
+        .nav-links a { text-decoration: none; color: var(--text-main); font-weight: 500; transition: var(--transition); }
+        .nav-links a:hover { color: var(--primary); }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        .hero h1 { font-size: 3rem; margin-bottom: 1rem; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { max-width: 600px; margin: 0 auto 2rem; color: var(--text-muted); font-size: 1.1rem; }
+
+        /* --- DASHBOARD / STATS --- */
+        .stats-bar {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            margin: -30px auto 40px;
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        .stat-item { text-align: center; border-right: 1px solid var(--border); }
+        .stat-item:last-child { border: none; }
+        .stat-val { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- COURSE CATALOG --- */
+        .filters { margin-bottom: 30px; gap: 10px; flex-wrap: wrap; }
+        .filter-tag {
+            padding: 6px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .filter-tag.active, .filter-tag:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .course-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+        
+        .course-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+        .course-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+        .card-img { height: 160px; background: #ddd; position: relative; }
+        .card-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; }
+        
+        /* Dynamic Gradients for Placeholders */
+        .grad-1 { background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); }
+        .grad-2 { background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); }
+        .grad-3 { background: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%); }
+        .grad-4 { background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%); }
+
+        .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        .card-title { font-size: 1.25rem; margin-bottom: 10px; font-weight: 700; }
+        .card-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; flex: 1; }
+        .progress-bar-bg { height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+        .progress-fill { height: 100%; background: var(--secondary); width: 0%; transition: width 0.5s ease; }
+        .card-meta { justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-top: auto; }
+
+        /* --- LEARNING INTERFACE (MODAL) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        
+        .modal-content {
+            background: var(--bg-card); width: 90%; max-width: 900px; height: 85vh;
+            border-radius: var(--radius); display: flex; overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .sidebar { width: 300px; background: var(--bg-body); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
+        .close-modal { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem; color: var(--text-muted); }
+        
+        .module-list { list-style: none; margin-top: 20px; }
+        .module-item { 
+            padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; 
+            border: 1px solid transparent; font-size: 0.9rem; color: var(--text-muted); display: flex; justify-content: space-between;
+        }
+        .module-item:hover { background: rgba(0,0,0,0.05); }
+        .module-item.active { background: var(--primary); color: white; font-weight: 600; }
+        .module-item.completed .status-icon { color: var(--secondary); }
+
+        /* --- QUIZ STYLES --- */
+        .quiz-container { margin-top: 20px; border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+        .quiz-option {
+            display: block; width: 100%; text-align: left; padding: 15px; margin: 10px 0;
+            border: 2px solid var(--border); border-radius: 8px; background: var(--bg-card);
+            cursor: pointer; transition: 0.2s; color: var(--text-main);
+        }
+        .quiz-option:hover { border-color: var(--primary); background: rgba(79, 70, 229, 0.05); }
+        .quiz-option.correct { border-color: var(--secondary); background: rgba(16, 185, 129, 0.1); }
+        .quiz-option.incorrect { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+
+        /* Notification Toast */
+        .toast {
+            position: fixed; bottom: 30px; right: 30px;
+            background: var(--text-main); color: var(--bg-card);
+            padding: 12px 24px; border-radius: 8px;
+            transform: translateY(150%); transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 2000; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .toast.show { transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .modal-content { flex-direction: column; }
+            .sidebar { width: 100%; height: 200px; border-right: none; border-bottom: 1px solid var(--border); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container flex">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            Lumina
+        </div>
+        <nav class="flex nav-links">
+            <a href="#" onclick="renderHome()">Catalog</a>
+            <a href="#" onclick="alert('Profile feature coming soon!')">My Learning</a>
+            <button class="btn btn-outline" id="theme-toggle">🌙</button>
+        </nav>
+    </div>
+</header>
+
+<div id="app">
+    <section class="hero">
+        <div class="container">
+            <h1>Master Complex Topics</h1>
+            <p>Advanced, distraction-free learning with real-time progress tracking and interactive assessments.</p>
+            <button class="btn btn-primary" onclick="document.getElementById('catalog').scrollIntoView({behavior: 'smooth'})">Start Learning</button>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="grid stats-bar">
+            <div class="stat-item">
+                <div class="stat-val" id="total-points">0</div>
+                <div class="stat-label">Knowledge Points</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val" id="courses-completed">0</div>
+                <div class="stat-label">Certificates</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-val" id="streak-days">1</div>
+                <div class="stat-label">Day Streak</div>
+            </div>
+        </div>
+
+        <div id="catalog">
+            <div class="flex filters">
+                <div class="filter-tag active" onclick="filterCourses('all')">All</div>
+                <div class="filter-tag" onclick="filterCourses('Computer Science')">Computer Science</div>
+                <div class="filter-tag" onclick="filterCourses('Physics')">Physics</div>
+                <div class="filter-tag" onclick="filterCourses('Mathematics')">Mathematics</div>
+            </div>
+
+            <div class="grid course-grid" id="course-list">
+                </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="learning-modal">
+    <div class="modal-content">
+        <div class="close-modal" onclick="closeModal()">&times;</div>
+        
+        <div class="sidebar">
+            <h3 style="margin-bottom: 15px;">Course Modules</h3>
+            <ul class="module-list" id="module-list-ui">
+                </ul>
+        </div>
+
+        <div class="main-content" id="lesson-content">
+            </div>
+    </div>
+</div>
+
+<div class="toast" id="toast">Correct Answer! +50 XP</div>
+
+<script>
+    /* --- DATA STORE --- */
+    const db = {
+        courses: [
+            {
+                id: 1,
+                title: "Advanced Algorithms",
+                category: "Computer Science",
+                desc: "Master Graph Theory, Dynamic Programming, and Big O notation.",
+                grad: "grad-1",
+                modules: [
+                    { 
+                        id: 101, 
+                        title: "Intro to Complexity", 
+                        type: "text", 
+                        content: "<h1>Time Complexity</h1><p>Time complexity quantifies the amount of time taken by an algorithm to run as a function of the length of the string representing the input. The most common notation is Big O.</p><div class='quiz-container'><h3>Quick Check:</h3><p>Which is faster?</p><button class='quiz-option' onclick='checkAnswer(this, true)'>O(1) - Constant Time</button><button class='quiz-option' onclick='checkAnswer(this, false)'>O(n) - Linear Time</button></div>"
+                    },
+                    { 
+                        id: 102, 
+                        title: "Binary Search Trees", 
+                        type: "quiz",
+                        content: "<h1>Binary Search Trees</h1><p>A BST is a node-based binary tree data structure which has the following properties: The left subtree of a node contains only nodes with keys lesser than the node's key.</p><div class='quiz-container'><h3>Quiz:</h3><p>What is the worst case complexity of searching a BST?</p><button class='quiz-option' onclick='checkAnswer(this, false)'>O(log n)</button><button class='quiz-option' onclick='checkAnswer(this, true)'>O(n)</button></div>" 
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Quantum Mechanics I",
+                category: "Physics",
+                desc: "Understand wave-particle duality and the Schrödinger equation.",
+                grad: "grad-2",
+                modules: [
+                    { 
+                        id: 201, 
+                        title: "Wave-Particle Duality", 
+                        type: "text", 
+                        content: "<h1>Wave-Particle Duality</h1><p>Every particle or quantum entity may be described as either a particle or a wave.</p><div class='quiz-container'><h3>Concept Check:</h3><p>Which experiment demonstrated the wave nature of electrons?</p><button class='quiz-option' onclick='checkAnswer(this, true)'>Double-slit experiment</button><button class='quiz-option' onclick='checkAnswer(this, false)'>Oil drop experiment</button></div>"
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "Calculus: Derivatives",
+                category: "Mathematics",
+                desc: "Deep dive into limits, continuity, and differentiation rules.",
+                grad: "grad-4",
+                modules: [
+                    { id: 301, title: "Limits", type: "text", content: "<h1>Limits</h1><p>The limit of a function is a fundamental concept in calculus and analysis concerning the behavior of that function near a particular input.</p>" }
+                ]
+            }
+        ]
+    };
+
+    /* --- STATE MANAGEMENT --- */
+    let state = {
+        theme: 'light',
+        points: 0,
+        completedModules: [], // Array of module IDs
+        currentCourse: null
+    };
+
+    /* --- INITIALIZATION --- */
+    document.addEventListener('DOMContentLoaded', () => {
+        loadState();
+        renderCourses('all');
+        updateStats();
+        
+        // Theme Toggle Logic
+        const themeBtn = document.getElementById('theme-toggle');
+        if(state.theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeBtn.innerText = '☀️';
+        }
+
+        themeBtn.addEventListener('click', () => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            state.theme = isDark ? 'light' : 'dark';
+            themeBtn.innerText = isDark ? '🌙' : '☀️';
+            saveState();
+        });
+    });
+
+    /* --- CORE LOGIC --- */
+
+    function renderCourses(filter) {
+        const grid = document.getElementById('course-list');
+        grid.innerHTML = '';
+        
+        const courses = filter === 'all' 
+            ? db.courses 
+            : db.courses.filter(c => c.category === filter);
+
+        courses.forEach(c => {
+            // Calculate progress
+            const totalMods = c.modules.length;
+            const completedInCourse = c.modules.filter(m => state.completedModules.includes(m.id)).length;
+            const percent = (completedInCourse / totalMods) * 100;
+
+            const card = document.createElement('div');
+            card.className = 'course-card';
+            card.innerHTML = `
+                <div class="card-img ${c.grad}">
+                    <span class="card-badge">${c.category}</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">${c.title}</div>
+                    <div class="card-desc">${c.desc}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-fill" style="width: ${percent}%"></div>
+                    </div>
+                    <div class="card-meta flex">
+                        <span>${completedInCourse}/${totalMods} Modules</span>
+                        <button class="btn btn-outline" style="font-size:0.8rem; padding: 4px 10px;" onclick="openCourse(${c.id})">
+                            ${percent === 100 ? 'Review' : 'Continue'}
+                        </button>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        // Update active filter UI
+        document.querySelectorAll('.filter-tag').forEach(tag => {
+            if(tag.innerText === filter || (filter === 'all' && tag.innerText === 'All')) {
+                tag.classList.add('active');
+            } else {
+                tag.classList.remove('active');
+            }
+        });
+    }
+
+    function filterCourses(cat) {
+        renderCourses(cat);
+    }
+
+    /* --- LEARNING MODAL LOGIC --- */
+    function openCourse(id) {
+        const course = db.courses.find(c => c.id === id);
+        state.currentCourse = course;
+        
+        document.getElementById('learning-modal').classList.add('open');
+        renderModuleList(course);
+        
+        // Open first incomplete module or the first one
+        const firstIncomplete = course.modules.find(m => !state.completedModules.includes(m.id));
+        loadModule(firstIncomplete ? firstIncomplete.id : course.modules[0].id);
+    }
+
+    function closeModal() {
+        document.getElementById('learning-modal').classList.remove('open');
+        renderCourses('all'); // Re-render to update progress bars
+    }
+
+    function renderModuleList(course) {
+        const list = document.getElementById('module-list-ui');
+        list.innerHTML = '';
+        
+        course.modules.forEach(m => {
+            const isCompleted = state.completedModules.includes(m.id);
+            const li = document.createElement('li');
+            li.className = `module-item ${isCompleted ? 'completed' : ''}`;
+            li.id = `mod-link-${m.id}`;
+            li.innerHTML = `
+                <span>${m.title}</span>
+                ${isCompleted ? '<span class="status-icon">✓</span>' : ''}
+            `;
+            li.onclick = () => loadModule(m.id);
+            list.appendChild(li);
+        });
+    }
+
+    function loadModule(moduleId) {
+        const module = state.currentCourse.modules.find(m => m.id === moduleId);
+        
+        // Highlight active sidebar item
+        document.querySelectorAll('.module-item').forEach(el => el.classList.remove('active'));
+        document.getElementById(`mod-link-${moduleId}`).classList.add('active');
+
+        // Render Content
+        const contentArea = document.getElementById('lesson-content');
+        contentArea.innerHTML = `
+            <h2 style="margin-bottom:20px; color:var(--primary);">${module.title}</h2>
+            <div class="lesson-text">${module.content}</div>
+        `;
+
+        // Mark as "read" immediately if it's text-only, or wait for quiz
+        if(!state.completedModules.includes(moduleId) && !module.content.includes('quiz-container')) {
+             completeModule(moduleId);
+        }
+    }
+
+    function checkAnswer(btn, isCorrect) {
+        const parent = btn.parentElement;
+        // Disable all buttons in this quiz
+        const buttons = parent.querySelectorAll('button');
+        buttons.forEach(b => b.disabled = true);
+
+        if(isCorrect) {
+            btn.classList.add('correct');
+            showToast("Correct! +50 Points");
+            state.points += 50;
+            
+            // Find current module ID from the active sidebar link
+            const activeId = parseInt(document.querySelector('.module-item.active').id.replace('mod-link-', ''));
+            completeModule(activeId);
+        } else {
+            btn.classList.add('incorrect');
+            buttons.forEach(b => {
+                if(b.textContent.includes('Constant') || b.textContent.includes('O(n)') || b.textContent.includes('Double')) { 
+                    // Simple heuristic to show correct answer for demo purposes
+                    // In a real app, logic would be more robust
+                }
+            });
+            showToast("Try again next time!");
+        }
+        updateStats();
+        saveState();
+    }
+
+    function completeModule(id) {
+        if(!state.completedModules.includes(id)) {
+            state.completedModules.push(id);
+            document.getElementById(`mod-link-${id}`).classList.add('completed');
+            document.getElementById(`mod-link-${id}`).querySelector('span:last-child').innerHTML = '✓'; // Add checkmark
+            saveState();
+        }
+    }
+
+    /* --- UTILITIES --- */
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function updateStats() {
+        document.getElementById('total-points').innerText = state.points;
+        // Calc completed courses
+        let completedCoursesCount = 0;
+        db.courses.forEach(c => {
+            const courseModIds = c.modules.map(m => m.id);
+            if(courseModIds.every(id => state.completedModules.includes(id))) {
+                completedCoursesCount++;
+            }
+        });
+        document.getElementById('courses-completed').innerText = completedCoursesCount;
+    }
+
+    function saveState() {
+        localStorage.setItem('luminaState', JSON.stringify(state));
+    }
+
+    function loadState() {
+        const saved = localStorage.getItem('luminaState');
+        if(saved) {
+            state = JSON.parse(saved);
+        }
+    }
+
+</script>
+</body>
+</html>
